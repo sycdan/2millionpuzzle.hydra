@@ -1,0 +1,3 @@
+django>=4
+django-image-cropping>1
+easy-thumbnails

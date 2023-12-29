@@ -1,0 +1,347 @@
+{% load static%}
+{% load cropping%}
+<html>
+	<head>
+		<title>Hydra - 2MillionPuzzle Helper</title>
+		<link href="{% static 'bootstrap/css/bootstrap.min.css'%}" rel="stylesheet">
+		<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+		<style type="text/css">
+			body {
+				padding: 4px;
+			}
+
+			fieldset {
+				border: 1px solid grey;
+				margin-top: 2px;
+				padding: 4px;
+			}
+
+			table.grid {
+				border-collapse: collapse;
+			}
+
+			table.grid tr {
+				border-style: none;
+				padding: 0;
+			}
+
+			table.grid tr th {
+				text-align: center;
+				background-color: grey;
+				padding: 2px;
+			}
+
+			table.grid tr td {
+				padding: 0;
+				border: none;
+				height: 80px;
+				line-height: 80px;
+				width: 80px;
+				min-width: 80px;
+				text-align: center;
+				cursor: pointer;
+			}
+
+			table.grid tr td div.piece {
+				background-size: 80px 80px;
+			}
+			table.grid tr td img.piece {
+				width: 80px;
+				height: 80px;
+			}
+
+			table.grid tr:nth-child(odd) td:nth-child(even),
+			table.grid tr:nth-child(even) td:nth-child(odd) {
+	  		background-color: #f2f2f2;
+			}
+
+			.shapes {
+				margin: 2px;
+			}
+
+			.cell {
+				position: relative;
+			}
+
+			.cell-content {
+				padding: 0;
+			}
+
+			.cell-overlay {
+				position: absolute;
+				width: 100%;
+				top: 0;
+				left: 0;
+			}
+
+			.selected {
+				background-color: magenta;
+				opacity: .5;
+			}
+
+			.matches .piece {
+				display: inline-block;
+				margin: 0;
+				padding: 0;
+				border: none;
+			}
+			
+			.piece.used {
+				background-color: red;
+				opacity: .8;
+			}
+			.piece.used img {
+				opacity: .8;
+			}
+
+			.turn0 {
+				transform: rotate(0deg);
+			}
+			.turn1 {
+				transform: rotate(90deg);
+			}
+			.turn2 {
+				transform: rotate(180deg);
+			}
+			.turn3 {
+				transform: rotate(270deg);
+			}
+
+			.center {
+				text-align: center;
+			}
+
+			img.shape {
+				width: 150px;
+				height: 150px;
+			}
+
+			.pointer {
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body>
+		<form method="POST" id="cellForm">
+			<fieldset>
+				<legend>
+					{%if selected_cell%}
+					Selected cell: {{selected_cell.coords}}
+					<button class="btn btn-danger" type="button" onclick="clearCell({{selected_cell.shape.id}})">Clear</button>
+					{%else%}
+					No cell selected (click on the grid)
+					{%endif%}
+				</legend>
+				{%if selected_cell%}
+				<div class="shapes">
+					{%for shape in shapes%}
+					<img class="pointer shape turn{{selected_cell.turns}} {%if selected_cell.shape == shape%}selected{%endif%}" src="{{shape.image.url}}" onclick="setShape({{shape.id}})"/>
+					{%endfor%}
+				</div>
+				{%endif%}
+				<input type="hidden" name="shape_id" value="{{selected_cell.shape.id}}"/>
+				<input type="hidden" name="place_piece_id" value=""/>
+				<input type="hidden" name="turns" value="{{selected_cell.turns}}"/>
+				{%if selected_cell and selected_cell.shape%}
+				<div>
+					Turns:
+					<button class="btn btn-{%if selected_cell.turns == 0%}info{%else%}secondary{%endif%}" type="button" onclick="turnCell(0)">0 (0°)</button>
+					<button class="btn btn-{%if selected_cell.turns == 1%}info{%else%}secondary{%endif%}" type="button" onclick="turnCell(1)">1 (90°)</button>
+					<button class="btn btn-{%if selected_cell.turns == 2%}info{%else%}secondary{%endif%}" type="button" onclick="turnCell(2)">2 (180°)</button>
+					<button class="btn btn-{%if selected_cell.turns == 3%}info{%else%}secondary{%endif%}" type="button" onclick="turnCell(3)">3 (270°)</button>
+				</div>
+				{%endif%}
+			</fieldset>
+
+			{%if selected_cell%}
+			<fieldset>
+				<legend>Filters</legend>
+				
+				<div>Limbs</div>
+				<label for="limba" class="form-label">A</label>
+				<input type="text" name="limba" id="limba" value="{{limba}}"/>
+				<label for="limbb" class="form-label">B</label>
+				<input type="text" name="limbb" id="limbb" value="{{limbb}}"/>
+				<label for="limbc" class="form-label">C</label>
+				<input type="text" name="limbc" id="limbc" value="{{limbc}}"/>
+				<label for="limbd" class="form-label">D</label>
+				<input type="text" name="limbd" id="limbd" value="{{limbd}}"/>
+
+				<div>Heads</div>
+				<label for="heada" class="form-label">A</label>
+				<input type="text" name="heada" id="heada" value="{{heada}}"/>
+				<label for="headb" class="form-label">B</label>
+				<input type="text" name="headb" id="headb" value="{{headb}}"/>
+				<label for="headc" class="form-label">C</label>
+				<input type="text" name="headc" id="headc" value="{{headc}}"/>
+				<label for="headd" class="form-label">D</label>
+				<input type="text" name="headd" id="headd" value="{{headd}}"/>
+				
+				<div>
+					<label for="num" class="form-label">Number</label>
+					<input type="number" name="piece_num" value="{{piece_num}}"/>
+				</div>
+
+				<div class="form-check">
+					<label for="include_used" class="form-check-label">Include Used</label>
+					<input type="checkbox" name="include_used" id="include_used" value="1" {%if include_used%}checked{%endif%} class="form-check-input"/>
+				</div>
+				
+				<button class="btn btn-primary" type="submit">Filter</button>
+				<button class="btn btn-secondary" type="button" onclick=" clearFilters()">Reset</button>
+			</fieldset>
+			<h3>Matched {{pieces|length}} piece{%if pieces|length != 1%}s{%endif%}</h3>
+			<div class="matches">
+				{%for piece in pieces%}
+				<div class="piece {%if piece in used_pieces%}used{%endif%} pointer">
+					<img class="turn{{selected_cell.turns}}" width=200 height=200 src="{% cropped_thumbnail piece 'cropping' scale=0.5%}" title="{{piece}}" onclick="placePiece({{piece.id}})">
+					<div class="center">{{piece}}</div>
+				</div>
+				{%endfor%}
+			</div>
+			{%endif%}
+		</form>
+
+		<table class="grid">
+			{%for row in grid%}
+
+			{# Header row with column numbers #}
+			{%if forloop.first%}
+			<tr>
+				<th></th>
+				{%for col in row%}
+				<th>{{forloop.counter}}</th>
+				{%endfor%}
+				<th></th>
+			</tr>
+			{%endif%}
+
+			<tr>
+				{%for cell in row%}
+
+				{# Header column with row numbers #}
+				{%if forloop.first%}
+				<th>{{cell.r}}</th>
+				{%endif%}
+
+				<td class="cell" onclick="selectCell({{cell.id}})">
+					<div class="cell-content">
+						{% if cell.piece or cell.shape %}
+						<img
+							class="piece turn{{cell.turns}}"
+							src="{%if cell.piece%}{% cropped_thumbnail cell.piece "cropping" scale=0.5%}{%else%}{{cell.shape.image.url}}{%endif%}"
+							title="{%if cell.piece%}{{cell.piece}}{%endif%}"
+						></img>
+						{%endif%}
+						{%if not cell.piece%}
+						<div class="cell-overlay empty">{{cell.c}},{{cell.r}}</div>
+						{%endif%}
+						{%if cell == selected_cell%}
+						<div class="cell-overlay selected">&nbsp;</div>
+						{%endif%}
+					</div>
+				</td>
+
+				{# Header column with row numbers #}
+				{%if forloop.last%}
+				<th>{{cell.r}}</th>
+				{%endif%}
+
+				{%endfor%}
+			</tr>
+
+			{# Header row with column numbers #}
+			{%if forloop.last%}
+			<tr>
+				<th></th>
+				{%for col in row%}
+				<th>{{forloop.counter}}</th>
+				{%endfor%}
+				<th></th>
+			</tr>
+			{%endif%}
+
+			{%endfor%}
+		</table>
+	</body>
+</html>
+<script type="text/javascript">
+function getForm(id) {
+	return document.getElementById(id);
+}
+
+function clearFilters() {
+	const form = getForm('cellForm');
+	const inputs = form.getElementsByTagName('input');
+  // Iterate through input elements
+  for (let i = 0; i < inputs.length; i++) {
+		const input = inputs[i];
+		const id = input.id;
+		const name = input.name;
+		if (name.startsWith('limb') || name.startsWith('head') || name.startsWith('include')) {
+			input.value = null;
+		}
+  }
+	form.submit();
+}
+
+// Function to add a GET parameter to the current URL and reload the page
+function replaceQueryParamAndReload(paramName, paramValue) {
+	// Create a URL object to manipulate the URL components
+	const url = new URL(window.location.href);
+
+	// Update the query parameter value
+	url.searchParams.set(paramName, paramValue);
+
+	// Replace the URL with the modified one
+	window.history.replaceState({}, '', url);
+
+	// Reload the page
+	window.location.reload();
+}
+
+function selectCell(id) {
+	replaceQueryParamAndReload('cell_id', id);
+}
+
+function placePiece(id) {
+	if (confirm(`Place piece ID ${id} at {{selected_cell.coords}}?`)) {
+		const form = getForm('cellForm');
+		form.elements['place_piece_id'].value = id;
+		form.submit();
+	}
+}
+
+function setShape(id) {
+	if (confirm(`Set shape of selected cell to ID ${id}?`)) {
+		const form = getForm('cellForm');
+		form.elements['shape_id'].value = id;
+		form.submit();
+	}
+}
+
+function turnCell(turns) {
+	if (confirm(`Rotate selected cell${turns * 90}?`)) {
+		const form = getForm('cellForm');
+		form.elements['turns'].value = turns;
+		form.submit();
+	}
+}
+
+function clearCell(id) {
+	if (confirm(`Clear cell at {{selected_cell.coords}}?`)) {
+		const form = getForm('cellForm');
+		form.elements['place_piece_id'].value = 0;
+		form.submit();
+	}
+}
+
+function scrollToTop() {
+	window.scrollTo(0, 0);
+}
+
+window.onload = function() {
+	setTimeout(scrollToTop, {{settings.SCROLL_TOP_DELAY}});
+	getForm('cellForm').elements['limba'].focus()
+}
+</script>
