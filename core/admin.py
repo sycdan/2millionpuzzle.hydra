@@ -1,7 +1,6 @@
+from core.models import Cell, Piece, Shape
 from django.contrib import admin
 from image_cropping import ImageCroppingMixin
-
-from core.models import Cell, Piece, Shape
 
 
 class ShapeAdmin(ImageCroppingMixin, admin.ModelAdmin):

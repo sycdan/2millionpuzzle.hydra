@@ -15,10 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 import logging
+
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
-from django.conf.urls.static import static
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ if settings.DEBUG:
    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 try:
+    # Catch annoying errors related to both autoreload and autosave being enabled
     import core.views
     urlpatterns += [
         path('', core.views.index),

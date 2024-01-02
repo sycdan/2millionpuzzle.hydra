@@ -1,10 +1,9 @@
 import logging
-from django.conf import settings
-
-from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
 
 from core.models import Cell, Piece, Shape
+from django.conf import settings
+from django.shortcuts import redirect, render
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 

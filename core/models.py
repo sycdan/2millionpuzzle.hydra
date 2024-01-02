@@ -22,7 +22,7 @@ class Piece(models.Model):
     class Meta:
         ordering = ('shape', 'num')
 
-    shape = models.ForeignKey(Shape, null=True, blank=False, on_delete=models.CASCADE)
+    shape = models.ForeignKey(Shape, null=False, blank=False, on_delete=models.CASCADE)
     num = models.IntegerField(null=False, blank=False)
     image = ImageCropField(null=False, blank=True, upload_to='uploaded_images')
     cropping = ImageRatioField('image', '500x500', free_crop=True, size_warning=True)
@@ -79,7 +79,7 @@ class Cell(models.Model):
     """
     A specific space for a puzzle piece. May or may not be filled with an actual piece.
     """
-    shape = models.ForeignKey(Shape, null=True, blank=True, on_delete=models.CASCADE)
+    shape = models.ForeignKey(Shape, null=False, blank=False, on_delete=models.CASCADE)
     piece = models.ForeignKey(Piece, null=True, blank=True, on_delete=models.CASCADE)
     turns = models.IntegerField(null=False, blank=True, default=0)
     c = models.IntegerField(null=False, blank=False)

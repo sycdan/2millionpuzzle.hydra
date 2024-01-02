@@ -1,3 +1,4 @@
-django>=4
+django==4.2.*
 django-image-cropping>1
-easy-thumbnails
+easy-thumbnails>2
+environs[django]>=10

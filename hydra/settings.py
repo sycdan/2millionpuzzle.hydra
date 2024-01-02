@@ -10,8 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import base64
+import json
 import os
 from pathlib import Path
+
+from environs import Env
+
+env = Env()
+env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +28,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ql-07ycqh79^iqi@@#6w9am@-*q*pu9%-3krxq8f8y+j4e%w+z'
+SECRET_KEY = env("SECRET_KEY", 'django-insecure-ql-07ycqh79^iqi@@#6w9am@-*q*pu9%-3krxq8f8y+j4e%w+z')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', [])
 
 
 # Application definition
@@ -134,6 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 # Path where media is stored
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+UPLOADED_IMAGES_PATH = os.path.join(os.path.join(BASE_DIR, 'media'), 'uploaded_images')
 
 
 # django-image-cropping
@@ -159,42 +167,73 @@ LIMB_SEQUENCES = [
     ('sw', 'nw', 'ne', 'se'),
 ]
 PIECE_SHAPES = [
-    dict(key='0', heads=0, name='X'),
     dict(key='1', heads=1, name='1 Head'),
     dict(key='2', heads=2, name='2 Heads'),
     dict(key='3', heads=3, name='3 Heads'),
     dict(key='4', heads=4, name='4 Heads'),
     dict(key='c', heads=2, name='Classic'),
+    dict(key='x', heads=0, name='X'),
 ]
 # Format is <key>+<turns> where each turn is 90 degrees clockwise, and the default orientation is the shape image
-GRID = [
-    ['4', '2+1', 'c', '2', '3', 'c', '3', '2+1', '2+1', '1', '2', '4', 'c', '3', '2', 'c', '4', '1', '3+3', '3', 'c', '3', '3+1'],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-    ['2', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '3'],
-]
+DEFAULT_GRID = """
+W1siNCswIiwiMisxIiwiYyswIiwiMiswIiwiMyswIiwiYyswIiwiMyswIiwiMisxIiwiMisxIiwiMSsw
+IiwiMiswIiwiNCswIiwiYyswIiwiMyswIiwiMisxIiwiYyswIiwiNCswIiwiMSswIiwiMyszIiwiMysw
+IiwiMSswIiwiMyswIiwiMysxIl0sWyJ4KzAiLCJ4KzEiLCIzKzMiLCIzKzAiLCIyKzMiLCIzKzAiLCIy
+KzIiLCIyKzIiLCIzKzEiLCIyKzEiLCIzKzEiLCIzKzEiLCIxKzIiLCJjKzEiLCIyKzEiLCJjKzAiLCIz
+KzIiLCIzKzAiLCIxKzIiLCIyKzAiLCIyKzMiLCI0KzAiLCIxKzAiXSxbIjErMSIsIjErMiIsIjMrMCIs
+IjIrMiIsIjErMCIsIjMrMiIsIjMrMSIsIjQrMCIsIjMrMSIsIjIrMSIsIngrMCIsIjErMyIsIjErMyIs
+IjIrMCIsIjMrMCIsIjErMiIsIjErMSIsIjIrMCIsIjMrMCIsIjErMSIsIjErMCIsImMrMSIsIjErMCJd
+LFsieCswIiwieCswIiwiMSswIiwiMSswIiwiMyswIiwiYysxIiwiMiszIiwiMyszIiwiYysxIiwiYysw
+IiwiMyswIiwiYyswIiwiMyszIiwiMyszIiwiMyswIiwiMSsxIiwiMisxIiwiMysxIiwiMysxIiwiYysw
+IiwiMyszIiwiMyswIiwiMSswIl0sWyJjKzAiLCJ4KzEiLCIzKzAiLCIzKzMiLCIyKzEiLCJjKzAiLCIx
+KzMiLCIzKzAiLCIxKzEiLCIyKzEiLCJ4KzAiLCIyKzMiLCJjKzEiLCIyKzEiLCJjKzAiLCIyKzAiLCIy
+KzMiLCIzKzIiLCIxKzEiLCIyKzIiLCIzKzEiLCIzKzEiLCIxKzAiXSxbIjErMCIsIjErMiIsIjMrMCIs
+IjErMCIsIjIrMyIsIjMrMyIsImMrMSIsIjMrMSIsIjIrMSIsImMrMCIsIjQrMCIsImMrMCIsIjErMyIs
+IjIrMCIsIjMrMyIsIjMrMiIsImMrMCIsIjErMyIsImMrMSIsIjIrMSIsIjErMSIsIngrMCIsIjErMCJd
+LFsiMSswIiwiYysxIiwieCswIiwiNCswIiwiYyswIiwiMyswIiwieCswIiwiMiswIiwiMiszIiwiMisz
+IiwiYysxIiwiMSswIiwiNCswIiwieCswIiwiMSszIiwiYysxIiwiYyswIiwiMiswIiwiMyszIiwiMysz
+IiwiNCswIiwiYyswIiwiMSswIl0sWyIxKzAiLCIzKzEiLCJjKzAiLCIxKzMiLCJjKzEiLCIyKzEiLCIx
+KzAiLCI0KzIiLCIxKzEiLCIxKzIiLCIzKzAiLCJjKzIiLCJjKzEiLCIzKzEiLCIzKzEiLCJjKzAiLCIx
+KzMiLCIyKzAiLCIxKzMiLCJjKzEiLCJ4KzAiLCIyKzMiLCIxKzAiXSxbIjErMCIsIjErMSIsIjErMiIs
+IjIrMCIsIjIrMCIsIjQrMiIsImMrMCIsIjIrMyIsIjMrMCIsIjIrMiIsIjIrMSIsIjIrMiIsIjErMCIs
+IjMrMiIsIjErMSIsIjIrMiIsIjErMCIsIjMrMyIsIjIrMCIsIjQrMCIsImMrMCIsImMrMSIsIjErMCJd
+LFsiMSswIiwiMiswIiwiYyszIiwiMSswIiwiNCsyIiwiMSsyIiwiYyszIiwiMisyIiwiYysyIiwiMSsz
+IiwiMyszIiwiMSszIiwiMyswIiwiMSsxIiwiMisxIiwiMisyIiwiMSswIiwiYysxIiwiMSswIiwiMSsz
+IiwiMysyIiwiMysxIiwiMSswIl0sWyIxKzAiLCIyKzEiLCIxKzAiLCIyKzAiLCIyKzMiLCIzKzIiLCIx
+KzAiLCJjKzEiLCIyKzIiLCIzKzEiLCIxKzIiLCIyKzAiLCIzKzAiLCIyKzEiLCJjKzIiLCIyKzMiLCIz
+KzMiLCIzKzAiLCIyKzEiLCIxKzAiLCIyKzMiLCIxKzAiLCIxKzAiXSxbIjErMCIsIjMrMCIsIjErMCIs
+IjQrMyIsIjErMSIsIjErMiIsIjQrMCIsIjErMCIsIjErMyIsIjErMyIsImMrMyIsIjIrMSIsIjIrMSIs
+IjErMCIsIjErMyIsIjErMyIsImMrMSIsIjMrMSIsIjMrMSIsIjMrMSIsIngrMCIsIjErMCIsIjErMCJd
+LFsiMSswIiwiMysxIiwiMisxIiwiMisyIiwiMisxIiwiMSsyIiwiYyszIiwiYyswIiwiMiswIiwiNCsw
+IiwiMSswIiwiMiswIiwiMiswIiwiNCswIiwiMysxIiwiMisxIiwiYyswIiwiYysxIiwiMSsxIiwieCsw
+IiwiMyszIiwiMSswIiwiMSswIl0sWyJ4KzIiLCIxKzAiLCI0KzMiLCJ4KzEiLCIzKzMiLCIyKzMiLCIz
+KzAiLCIxKzIiLCIyKzAiLCIzKzIiLCIzKzMiLCIzKzEiLCIyKzEiLCIxKzIiLCIyKzMiLCIyKzAiLCIx
+KzMiLCIyKzAiLCIyKzAiLCI0KzAiLCIxKzEiLCIxKzAiLCIxKzAiXSxbIjErMCIsIjIrMCIsIjIrMyIs
+IjMrMCIsIjErMiIsImMrMyIsIjErMCIsIjMrMiIsImMrMCIsIjErMyIsIjMrMiIsIjErMSIsIjIrMSIs
+IjErMiIsImMrMSIsImMrMCIsIjMrMyIsIjMrMSIsIjIrMCIsIjIrMyIsIjErMCIsIjErMCIsIjErMCJd
+LFsiMSswIiwiMSswIiwiMiszIiwiMyszIiwiMysyIiwiMisxIiwiMysxIiwiMSsyIiwiMiszIiwiMysw
+IiwiMSsyIiwiNCswIiwiMSswIiwiMiszIiwiMiswIiwiMysyIiwiMisyIiwiMisyIiwiMysxIiwiMSsw
+IiwiMSswIiwiMSswIiwiMSswIl0sWyIxKzAiLCIxKzAiLCIxKzAiLCIxKzAiLCIxKzAiLCIyKzMiLCIy
+KzAiLCJjKzEiLCIyKzIiLCIyKzIiLCJjKzAiLCIyKzMiLCJjKzEiLCIyKzEiLCJ4KzAiLCI0KzMiLCIx
+KzEiLCIyKzIiLCIyKzIiLCJ4KzMiLCIyKzMiLCIzKzAiLCIxKzAiXSxbIjErMCIsIjErMCIsIjErMCIs
+IjErMCIsIjErMiIsIjMrMyIsIjMrMyIsImMrMyIsIjErMiIsImMrMSIsIjErMiIsIjQrMSIsImMrMCIs
+IjMrMCIsIjErMSIsImMrMiIsIjErMyIsIjIrMyIsIjQrMCIsIngrMCIsIjIrMCIsIjIrMCIsIjErMCJd
+LFsiMSswIiwiMSswIiwiMSswIiwiMSswIiwieCsxIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMysz
+IiwiMSszIiwiMysyIiwieCsyIiwiNCszIiwiMysxIiwieCsxIiwiNCsxIiwiMSsxIiwieCswIiwiMysz
+IiwiMyszIiwiMiswIiwiMSswIl0sWyIzKzIiLCIxKzAiLCIxKzAiLCIxKzAiLCIxKzAiLCIxKzAiLCIx
+KzAiLCIxKzAiLCIxKzAiLCIxKzAiLCIyKzEiLCIxKzAiLCIzKzEiLCIxKzIiLCIyKzMiLCI0KzMiLCIx
+KzEiLCIzKzEiLCIzKzEiLCIxKzIiLCIyKzMiLCIyKzAiLCIxKzAiXSxbIjErMCIsIjMrMSIsImMrMCIs
+ImMrMSIsIjErMCIsIjIrMCIsIjMrMiIsIjErMiIsIjMrMiIsIjErMCIsIjErMCIsIjErMCIsIjErMCIs
+IjErMCIsIjErMCIsIjErMCIsIjErMCIsIjErMCIsIjErMCIsIjErMCIsIjErMCIsIjErMCIsIjErMCJd
+LFsiMiswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSsw
+IiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSswIiwiMSsw
+IiwiMSswIiwiMSswIiwiMysxIl1d
+"""
+GRID = json.loads(base64.b64decode(env('GRID', DEFAULT_GRID)).decode('utf-8'))
 GRID_ROWS = len(GRID)
 GRID_COLS = len(GRID[0])
-# for r in GRID:
-#     assert len(r) == GRID_COLS, "Each row must have the same number of cols"
+for r in GRID:
+    assert len(r) == GRID_COLS, "Each row must have the same number of cols"
 
-SCROLL_TOP_DELAY = 300
-PIECE_QUERY_LIMIT = 30
+SCROLL_TOP_DELAY = env.int('SCROLL_TOP_DELAY', 300)
+PIECE_QUERY_LIMIT = env.int('PIECE_QUERY_LIMIT', 30)

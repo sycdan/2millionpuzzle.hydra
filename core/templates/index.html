@@ -301,10 +301,12 @@ function replaceQueryParamAndReload(paramName, paramValue) {
 }
 
 function selectCell(id) {
+	if (!id) return;
 	replaceQueryParamAndReload('cell_id', id);
 }
 
 function placePiece(id) {
+	if (!id) return;
 	if (confirm(`Place piece ID ${id} at {{selected_cell.coords}}?`)) {
 		const form = getForm('cellForm');
 		form.elements['place_piece_id'].value = id;
@@ -313,6 +315,7 @@ function placePiece(id) {
 }
 
 function setShape(id) {
+	if (!id) return;
 	if (confirm(`Set shape of selected cell to ID ${id}?`)) {
 		const form = getForm('cellForm');
 		form.elements['shape_id'].value = id;
@@ -329,6 +332,7 @@ function turnCell(turns) {
 }
 
 function clearCell(id) {
+	if (!id) return;
 	if (confirm(`Clear cell at {{selected_cell.coords}}?`)) {
 		const form = getForm('cellForm');
 		form.elements['place_piece_id'].value = 0;
