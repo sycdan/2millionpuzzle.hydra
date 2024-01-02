@@ -1,8 +1,9 @@
 from django.db import models
 from image_cropping.fields import ImageCropField, ImageRatioField
+from model_utils.models import TimeStampedModel
 
 
-class Shape(models.Model):
+class Shape(TimeStampedModel):
     """
     A generic puzzle piece with a particular shape, but no orientation or pattern.
     """
@@ -15,7 +16,7 @@ class Shape(models.Model):
         return self.name
 
 
-class Piece(models.Model):
+class Piece(TimeStampedModel):
     """
     A physical puzzle piece that can be placed in the grid.
     """
@@ -75,7 +76,7 @@ class Piece(models.Model):
         return haves[side]
 
 
-class Cell(models.Model):
+class Cell(TimeStampedModel):
     """
     A specific space for a puzzle piece. May or may not be filled with an actual piece.
     """
