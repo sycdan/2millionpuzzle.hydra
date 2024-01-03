@@ -167,12 +167,12 @@ LIMB_SEQUENCES = [
     ('sw', 'nw', 'ne', 'se'),
 ]
 PIECE_SHAPES = [
-    dict(key='1', heads=1, name='1 Head'),
-    dict(key='2', heads=2, name='2 Heads'),
-    dict(key='3', heads=3, name='3 Heads'),
-    dict(key='4', heads=4, name='4 Heads'),
-    dict(key='c', heads=2, name='Classic'),
-    dict(key='x', heads=0, name='X'),
+    dict(key='1', heads='n', name='1 Head'),
+    dict(key='2', heads='wn', name='2 Heads'),
+    dict(key='3', heads='wne', name='3 Heads'),
+    dict(key='4', heads='nesw', name='4 Heads'),
+    dict(key='c', heads='ns', name='Classic'),
+    dict(key='x', heads='', name='X'),
 ]
 # Format is <key>+<turns> where each turn is 90 degrees clockwise, and the default orientation is the shape image
 DEFAULT_GRID = """

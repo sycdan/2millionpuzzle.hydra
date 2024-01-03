@@ -9,7 +9,7 @@ class Shape(TimeStampedModel):
     """
     key = models.CharField(null=False, blank=False, max_length=255, unique=True)
     name = models.CharField(null=False, blank=True, max_length=255)
-    heads = models.IntegerField(null=True, blank=False, default=None)
+    heads = models.CharField(null=False, blank=True, max_length=255, default='', help_text="Some combination of n|e|s|w")
     image = ImageCropField(null=False, blank=True, upload_to='shapes')
 
     def __str__(self) -> str:
