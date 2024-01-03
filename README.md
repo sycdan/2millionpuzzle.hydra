@@ -8,12 +8,8 @@ And here is the finished puzzle. I won $1; the effort was worth every penny!
 
 > # Important note
 > I believe the die cut is the same for all puzzles -- this means that your puzzle should have the same shape pieces
-> in the same spots in the grid as mine (though the picture will likely be rotated). So you can use the shape
-> placeholders from my grid to solve your puzzle.
->
-> However, the grid included in the repo is not currently 100% complete and there may be cells turned the wrong way.
-> This is because it's my own personal grid which was built piecemeal as I was developing the software,
-> and I didn't always go back and fix data that was incorrect after I had successfully placed a piece by any means.
+> in the same spots in the grid as mine (though the picture may be rotated). So you can use the shape placeholders
+> from my grid to solve your puzzle. The grid included in the repo (in base64) should be complete.
 
 ## Donations
 
