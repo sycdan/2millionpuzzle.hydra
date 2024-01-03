@@ -11,6 +11,13 @@ And here is the finished puzzle. I won $1; the effort was worth every penny!
 > in the same spots in the grid as mine (though the picture may be rotated). So you can use the shape placeholders
 > from my grid to solve your puzzle. The grid included in the repo (in base64) should be complete.
 
+### The Grid
+
+If you don't want to spend the time cataloguing pieces, perhaps simply a diagram of the shape and orientation of every piece will help you along. 
+
+![grid](/etc/grid.png)
+*You will note that the edge pieces look a bit like interior pieces with their heads cut off. There's a good reason for that!*
+
 ## Donations
 
 I aspire to one day become an independent software/game/puzzle developer so that I can have the free time I need to start a permaculture food forest, as part of an ongoing effort to [beat Crohn's disease](https://weirdmidnightsandwich.wordpress.com). As such, if you find this software useful, any token of appreciation would be most... appreciated!
@@ -32,6 +39,7 @@ virtualenv .venv
 source .venv/Scripts/activate
 pip install -r requirements.txt
 ./manage.py migrate
+./manage.py seedgrid
 ./manage.py createsuperuser
 ```
 
@@ -62,7 +70,11 @@ After this, you need to photograph all of the pieces, in the same orientation fo
 
 The piece pictures should be placed in `./media/uploaded_images`, named in the format of `{shape_key}-{number}.jpg`, e.g. `2-69.jpg`. I used [PowerRename](https://learn.microsoft.com/en-us/windows/powertoys/powerrename) to achieve this.
 
-> After this is done, run `./manage.py seed` to add the pieces to the database, along with the shapes and grid cells.
+After this is done, the pieces must be added to the database:
+
+```bash
+./manage.py seedpieces
+```
 
 Then comes the really tedious part: inputting the piece edge data.
 
