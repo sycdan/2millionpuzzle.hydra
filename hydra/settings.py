@@ -242,6 +242,7 @@ GRID_ROWS = len(GRID)
 GRID_COLS = len(GRID[0])
 for r in GRID:
     assert len(r) == GRID_COLS, "Each row must have the same number of cols"
-
+# If True, only the shapes will be rendered in the grid, not the placed pieces
+GRID_ONLY = env.bool('GRID_ONLY', False)
 SCROLL_TOP_DELAY = env.int('SCROLL_TOP_DELAY', 300)
 PIECE_QUERY_LIMIT = env.int('PIECE_QUERY_LIMIT', 30)

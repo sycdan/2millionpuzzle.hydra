@@ -48,9 +48,11 @@ def index(request, *args, **kwrgs):
     used_pieces = []
     grid = list([None for _ in range(settings.GRID_COLS)] for _ in range(settings.GRID_ROWS))
     for cell in Cell.objects.filter():
-        grid[cell.r - 1][cell.c - 1] = cell
         if cell.piece:
             used_pieces.append(cell.piece)
+            if settings.GRID_ONLY:
+                cell.piece = None
+        grid[cell.r - 1][cell.c - 1] = cell
 
     # Set up the basic template data
     data = dict(
